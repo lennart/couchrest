@@ -107,7 +107,6 @@ module CouchRest
     # PUT an attachment directly to CouchDB
     def put_attachment(doc, name, file, options = {})
       docid = escape_docid(doc['_id'])
-      name = CGI.escape(name)
       uri = url_for_attachment(doc, name)
       JSON.parse(HttpAbstraction.put(uri, file, options))
     end
@@ -305,7 +304,7 @@ module CouchRest
         rev = doc['_rev']
       end
       docid = escape_docid(docid)
-      name = CGI.escape(name)
+      name = escape_attachment_name(name)
       rev = "?rev=#{doc['_rev']}" if rev
       "/#{docid}/#{name}#{rev}"
     end
@@ -324,6 +323,10 @@ module CouchRest
         v['data'] = base64(v['data'])
       end
       attachments
+    end
+
+    def escape_attachment_name(name)
+      CGI.escape name
     end
 
     def base64(data)

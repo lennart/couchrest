@@ -278,6 +278,27 @@ describe CouchRest::Database do
     end
   end
 
+  describe "PUT attachment with slashes in name from file" do
+    before(:each) do
+      filename = FIXTURE_PATH + '/attachments/couchdb.png'
+      @file = File.open(filename, "rb")
+    end
+    after(:each) do
+      @file.close
+    end
+    it "should save the attachment to a new doc" do
+      r = @db.put_attachment({'_id' => 'attach-this'}, 'images/couchdb.png', image = @file.read, {:content_type => 'image/png'})
+      r['ok'].should == true
+      doc = @db.get("attach-this")
+      attachment = @db.fetch_attachment(doc,"images/couchdb.png")
+      if attachment.respond_to?(:net_http_res)  
+        attachment.net_http_res.body.should == image
+      else
+        attachment.should == image
+      end
+    end
+  end
+
   describe "PUT document with attachment" do
     before(:each) do
       @attach = "<html><head><title>My Doc</title></head><body><p>Has words.</p></body></html>"
